@@ -11,15 +11,15 @@ jobs:
 
       - name: setup nodejs
         uses: actions/setup-node@v4
-       with:
+        with:
           node-version: 21
-          cache: npm 
-    
+          cache: npm
+
       - name: install dependencies
         run: npm install
 
       - name: make build
-        run : npm run build
+        run: npm run build
 
       - name: 'configure aws credential'
         uses: aws-actions/configure-aws-credentials@v6
