@@ -1,5 +1,12 @@
-name: Deploy app on s3
-on: push
+name: Deploy app on S3
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -11,22 +18,24 @@ jobs:
 
       - name: setup nodejs
         uses: actions/setup-node@v4
-       with:
-          node-version: 21
-          cache: npm 
-    
+        with:
+          node-version: 20
+          cache: npm
+
       - name: install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: make build
-        run : npm run build
+      - name: build
+        run: npm run build
 
-      - name: 'configure aws credential'
+      - name: configure aws credentials
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: ${{ secrets.AWS_REGION }}
           aws-access-key-id: ${{ secrets.ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.SECRET_KEY }}
 
-      - name: Upload files to S3
-        run: aws s3 sync . s3://${{ secrets.S3_BUCKET_NAME }} --delete --exclude ".git/*" --exclude ".github/*" --exclude ".gitignore"
+      - name: upload files to S3
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: aws s3 sync ./dist s3://${{ secrets.S3_BUCKET_NAME }} --delete
